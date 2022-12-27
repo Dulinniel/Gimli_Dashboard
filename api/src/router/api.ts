@@ -11,9 +11,9 @@ const api = Router();
 api.get("/auth/api", async ( req: Request, res: Response )  => {
 	console.log(chalk.blue(`* [${chalk.bold("Redirection")}] Redirected to ${chalk.underline("/auth/api")}`));
 
-	let code = getCookies(req, res);
+  let code = getCookies(req, res);
   const guild = await get(code["id"]);
-	res.send({ guild: guild["guilds"] });
+  res.send({ guild: guild["guilds"] });
 });
 
 export default api

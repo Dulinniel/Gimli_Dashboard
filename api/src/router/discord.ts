@@ -13,19 +13,19 @@ import chalk from "chalk";
 const discord = Router();
 
 discord.get("/auth/discord", cors(), async (req: Request, res: Response) => {
-	console.log(chalk.blue(`* [${chalk.bold("Redirection")}] Redirected to ${chalk.underline("/auth/discord")}`));
+  console.log(chalk.blue(`* [${chalk.bold("Redirection")}] Redirected to ${chalk.underline("/auth/discord")}`));
 
-	res.locals.cookie = getCookies(req, res);
+  res.locals.cookie = getCookies(req, res);
   const code = req.query.code as string;
 
   console.log(chalk.red(`* [${chalk.bold("Access Code")}] ${code}`));
 
   const params = new URLSearchParams({
-		"client_id": config.CLIENT_ID as string,
-  	"client_secret": config.SECRET as string,
-   	"grant_type": 'authorization_code',
+    "client_id": config.CLIENT_ID as string,
+    "client_secret": config.SECRET as string,
+    "grant_type": 'authorization_code',
     "code": code,
-   	"redirect_uri": config.REDIRECT_URI,
+    "redirect_uri": config.REDIRECT_URI,
   });
 
  	const header = {
@@ -66,18 +66,18 @@ discord.get("/auth/discord", cors(), async (req: Request, res: Response) => {
       id: userData.id
     };
 
-	  if ( res.locals.cookie == "" ) {
+    if ( res.locals.cookie == "" ) {
 
-		  res.cookie("id", code, {
-			  maxAge: 8500000,
-			  sameSite: "none",
-			  secure: true,
+      res.cookie("id", code, {
+        maxAge: 8500000,
+        sameSite: "none",
+        secure: true,
         path: "/"
-			});
+      });
 
      basicsUserInfo.code = code;
      
-		}
+    }
 
     guildData.forEach(g => {
       
