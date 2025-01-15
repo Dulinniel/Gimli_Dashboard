@@ -1,9 +1,18 @@
 {
-    "compilerOptions": {
-        "target": "es6",
-        "module": "commonjs",
-        "rootDir": "./",
-        "outDir": "./build",
-        "esModuleInterop": true
+  "compilerOptions": {
+    "target": "es2017",
+    "module": "CommonJS",
+    "esModuleInterop": true,
+    "types": ["node"],
+    "strictNullChecks": true,
+    "resolveJsonModule": true,
+    "skipDefaultLibCheck": true,
+    "emitDecoratorMetadata": true,
+    "outDir": "./build",
+    "strictPropertyInitialization": false,
+    "paths": {
+      "~/*": ["./src/*"],
+      "~~/*": ["./*"]
     }
+  },
 }

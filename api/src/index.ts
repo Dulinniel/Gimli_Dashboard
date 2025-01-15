@@ -1,24 +1,35 @@
-import express  from "express";
+import express, { Request, Response } from "express";
 import cors from "cors";
 import chalk from "chalk";
+
+import { UnknownRoutesHandler } from "./middlewares/unknownRoute.handler";
+
+import { AuthController } from "./ressources/auth.controller";
+import { GuildController } from "./ressources/guild.controller";
+
+import { DatabaseService } from "./services/database/database.service";
+
 import config from "../environments.config";
 
-import { root, auth, discord, api } from "./router";
-import { connectDatabase } from "./database/connectDatabase";
-
 const app = express();
-const port: string = config.PORT;
+const port: string = config.PORT as string | "8080";
 
 app.use(express.json());
 app.use(cors());
 
-app.use(root);
-app.use(auth);
-app.use(discord);
-app.use(api);
+app.use('/auth', AuthController);
+app.use('/guild', GuildController);
 
-app.listen(port, () => {
-    console.log(chalk.green(`* [${chalk.bold(port)}] server running at ${chalk.underline(`http://localhost:${port}`)}`));
+app.use('/', ( request: Request, response: Response ) => {
+  console.log(chalk.blue(`* [${chalk.bold("Redirection")}] Redirected to ${chalk.underline("/")}`));
+  response.status(200).send({ message: "Ok" });
 });
 
-connectDatabase();
+app.all('*', UnknownRoutesHandler)
+
+app.listen(port, () => {
+  console.log(chalk.green(`* [${chalk.bold(port)}] server running at ${chalk.underline(`http://localhost:${port}`)}`));
+});
+
+const databaseService = new DatabaseService();
+databaseService.openDatabase(config.MONGO_URI as string);
