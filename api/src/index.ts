@@ -18,7 +18,7 @@ app.use(express.json());
 app.use(cors());
 
 app.use('/auth', AuthController);
-app.use('/guild', GuildController);
+app.use('/guilds', GuildController);
 
 app.use('/', ( request: Request, response: Response ) => {
   console.log(chalk.blue(`* [${chalk.bold("Redirection")}] Redirected to ${chalk.underline("/")}`));

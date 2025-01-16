@@ -16,30 +16,25 @@ export class AuthService
     this._config = config
   }
 
-  // Récupère l'identité d'un utilisateur via son ID Discord
   public async getIdentity(discordId: string): Promise<IAuth | null> 
   {
     return await this._database.GetInfo(Auth, { id: discordId });
   }
 
-  // Crée ou met à jour l'identité d'un utilisateur
   public async upsertIdentity(identityData: IAuth): Promise<IAuth> 
   {
     const existingIdentity = await this._database.GetInfo(Auth, { id: identityData.id });
 
-    // Si l'utilisateur n'existe pas, on le crée
     if ( !existingIdentity ) return await this._database.CreateInfo(Auth, identityData);
     
-    // Si l'utilisateur existe, on met à jour ses infos
     await this._database.UpdateInfo(Auth, identityData, { id: identityData.id });
     return { ...existingIdentity, ...identityData }; 
   }
 
-  // Supprime l'identité d'un utilisateur
   public async removeIdentity(discordId: string): Promise<void> 
   {
     const existingIdentity = await this._database.GetInfo(Auth, { id: discordId });
-    if (existingIdentity) await this._database.RemoveInfo(Auth, { id: discordId });
+    if ( existingIdentity ) await this._database.RemoveInfo(Auth, { id: discordId });
   }
 
   public async exchangeCodeForToken(code: string): Promise<string> 
@@ -66,22 +61,24 @@ export class AuthService
 
   public async getUserInfo(token: string): Promise<any> 
   {
-    return await this.fetchFromDiscord("https://discord.com/api/v9/users/@me", token);
+    return await this.fetchFromDiscord("https://discord.com/api/v10/users/@me", token);
   }
 
-  public async getUserGuild(token: string): Promise<any> 
+  public async getGuildList(token: string): Promise<any> 
   {
-    return await this.fetchFromDiscord("https://discord.com/api/v9/users/@me/guilds", token);
+    return await this.fetchFromDiscord("https://discord.com/api/v10/users/@me/guilds", token);
   }
 
   private async fetchFromDiscord(url: string, token: string): Promise<any> 
   {
-    try {
+    try 
+    {
       const response = await axios.get(url, {
         headers: { Authorization: `Bearer ${token}` },
       });
       return response.data;
-    } catch (err) {
+    } catch (err) 
+    {
       this.handleError(err, `Error fetching data from ${url}`);
       throw new Error("Failed to fetch data from Discord");
     }
@@ -89,14 +86,11 @@ export class AuthService
 
   private handleError(err: AxiosError, message: string): void 
   {
-    if (err.response) 
+    if ( err.response ) 
     {
       console.error(`${message}: ${err.response.status} - ${err.response.statusText}`);
       console.error(`Response data: ${JSON.stringify(err.response.data)}`);
-    } else 
-    {
-      console.error(`${message}: ${err.message}`);
-    }
+    } else console.error(`${message}: ${err.message}`);
   }
 
 

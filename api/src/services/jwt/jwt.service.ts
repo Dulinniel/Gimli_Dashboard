@@ -1,4 +1,7 @@
 import jwt, { SignOptions } from "jsonwebtoken";
+
+import { JwtPayload } from "../../interfaces/jwt/JWT";
+
 import config from "../../../environments.config";
 
 export class JwtService 
@@ -18,7 +21,7 @@ export class JwtService
     return jwt.sign(payload, this.secret, options);
   }
 
-  verifyToken(token: string): object | null 
+  verifyToken(token: string): JwtPayload | null 
   {
     try 
     {

@@ -1,12 +1,5 @@
-export interface IAuth {
-  guilds: Array<DiscordGuild>,
+export interface IAuth 
+{
   id: string,
   username: string,
-};
-
-export interface DiscordGuild {
-  id: string,
-  name: string,
-  owner: boolean,
-  permissions: string
 };

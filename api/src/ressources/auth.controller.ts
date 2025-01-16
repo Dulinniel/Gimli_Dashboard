@@ -1,11 +1,11 @@
-import express, { Router, Request, Response } from "express";
+import { Router, Request, Response } from "express";
 import { AuthService } from "./auth/auth.service";
+import { GuildService } from "./guild/guild.service";
 import { JwtService } from "../services/jwt/jwt.service";
 
 import { DatabaseService } from "../services/database/database.service";
-import { IAuth, DiscordGuild } from "../interfaces/database/Auth";
-
-import { getCookies } from "../utils/cookie";
+import { IAuth } from "../interfaces/database/Auth";
+import { DiscordGuilds } from "../interfaces/database/Guilds";
 
 import config from "../../environments.config";
 import chalk from "chalk";
@@ -13,6 +13,7 @@ import chalk from "chalk";
 const AuthController = Router();
 const databaseService = new DatabaseService();
 const authService = new AuthService(databaseService, config);
+const guildService = new GuildService(databaseService);
 const jwtService = new JwtService();
 
 AuthController.get("/", ( _request: Request, response: Response ) => {
@@ -31,27 +32,35 @@ AuthController.get("/discord", async ( request: Request, response: Response ) =>
     }
     const token: string = await authService.exchangeCodeForToken(code);
     const userInfo = await authService.getUserInfo(token);
-    const userGuild = await authService.getUserGuild(token);
+    const userGuilds = await authService.getGuildList(token)
 
-    console.log(chalk.green(`* [User] ${userInfo.data.username} (${userInfo.data.id}) connected`));
+    console.log(chalk.green(`* [User] ${userInfo.username} (${userInfo.id}) connected`));
 
     const userData: IAuth = {
-      id: userInfo.data.id,
-      username: userInfo.data.username,
-      guilds: userGuild.data.map(item => ({
+      id: userInfo.id,
+      username: userInfo.username
+    };
+
+    const MANAGE_SERVER_PERMISSION: number = 1 << 5;
+    const filteredGuilds = userGuilds.filter(item => item.owner || ( item.permissions & MANAGE_SERVER_PERMISSION ) == MANAGE_SERVER_PERMISSION)
+      .map(item => ({
         id: item.id,
         name: item.name,
         owner: item.owner,
         permissions: item.permissions
-      } as DiscordGuild))
-    };
+      } as DiscordGuilds ));
 
     await authService.upsertIdentity(userData);
 
+    await guildService.upsertGuilds({
+      guilds: filteredGuilds,
+      userId: userInfo.id
+    });
+
     // Generate JWT
     const jwt = jwtService.generateToken({
-      id: userInfo.data.id,
-      username: userInfo.data.username
+      id: userInfo.id,
+      username: userInfo.username
     });
 
     // Send JWT to client
@@ -59,12 +68,13 @@ AuthController.get("/discord", async ( request: Request, response: Response ) =>
       httpOnly: true, // No JavaScript
       secure: config.NODE_ENV === "production",
       sameSite: "lax",
-      maxAge: 3600 * 1000 
+      maxAge: 3.6e6 
     });
 
-    response.status(307).redirect("http://localhost:8000/auth/api");
+    response.redirect("http://localhost:8000/guilds/list");
     return;
-  } catch (err: any) {
+  } catch (err: any) 
+  {
     console.error(chalk.redBright(`* [Error] ${err.message}`));
     response.status(500);
     return;
