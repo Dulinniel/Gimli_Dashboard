@@ -1,14 +1,18 @@
 import { Router, Request, Response } from "express";
+import { authMiddleware } from "../middlewares/auth.middleware";
+
+import chalk from "chalk";
+
 import { AuthService } from "./auth/auth.service";
 import { GuildService } from "./guild/guild.service";
 import { JwtService } from "../services/jwt/jwt.service";
-
 import { DatabaseService } from "../services/database/database.service";
+
 import { IAuth } from "../interfaces/database/Auth";
 import { DiscordGuilds } from "../interfaces/database/Guilds";
+import { AuthenticatedRequest } from "../interfaces/express/Request";
 
 import config from "../../environments.config";
-import chalk from "chalk";
 
 const AuthController = Router();
 const databaseService = new DatabaseService();
@@ -80,5 +84,15 @@ AuthController.get("/discord", async ( request: Request, response: Response ) =>
     return;
   }
 });
+
+AuthController.get("/check", authMiddleware, (request: AuthenticatedRequest, response: Response) => {
+  response.status(200).send({ message: "User authenticated", user: request.user });
+});
+
+AuthController.post("/logout", (_request: Request, response: Response) => {
+  response.clearCookie("auth_token");
+  response.status(200).send({ message: "Logged out successfully" });
+});
+
 
 export { AuthController }

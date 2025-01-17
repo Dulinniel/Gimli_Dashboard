@@ -15,7 +15,11 @@ const app = express();
 const port: string = config.PORT as string | "8080";
 
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:4200',
+  credentials: true
+  })
+);
 
 app.use('/auth', AuthController);
 app.use('/guilds', GuildController);

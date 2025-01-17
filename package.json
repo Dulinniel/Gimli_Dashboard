@@ -2,8 +2,6 @@
   "name": "backend",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
-  "proxy": "http://localhost:4000",
   "scripts": {
     "dev": "nodemon src/index.ts",
     "build": "tsup src/index.ts --format cjs --clean",
